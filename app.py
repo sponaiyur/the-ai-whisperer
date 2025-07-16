@@ -124,8 +124,7 @@ with tab2:
         st.success("History saved to CSV!")
 with tab3:
     st.subheader("🪶 Golden Rules for Better Prompting")
-    st.markdown(""" ### 🧠 10 Golden Rules for Better Prompting (According to an AI Model)
-
+    st.markdown(""" 
 #### 1. 🎯 Be Purposeful — Don’t Just Ask, Aim
 - ❌ "Tell me about inflation"
 - ✅ "Explain inflation as if I’m a high school student. Give a real-world example and 3 key effects it has on everyday life."
