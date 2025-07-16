@@ -64,7 +64,7 @@ if "history" not in st.session_state:
 st.title("🧠 The AI Whisperer: Your personal, AI based Prompt Critique!")
 st.subheader("Learn prompt engineering from a model that does both: Answers your query, and rates your prompt!")
 
-tab1, tab2= st.tabs(["📜 Prompt Evaluation", "⏳ Prompt History"])
+tab1, tab2, tab3= st.tabs(["📜 Prompt Evaluation", "⏳ Prompt History","🪶 Golden Rules for better prompting"])
 with tab1:
     st.subheader("📜 Prompt Evaluation")
     prompt = st.text_input("Enter your prompt:")
@@ -122,3 +122,56 @@ with tab2:
     if st.button("🔽 Save Progress to CSV"):
         save_history(st.session_state["history"])
         st.success("History saved to CSV!")
+with tab3:
+    st.subheader("🪶 Golden Rules for Better Prompting")
+    st.markdown(""" # 🧠 10 Golden Rules for Better Prompting (According to an AI Model)
+
+## 1. 🎯 Be Purposeful — Don’t Just Ask, Aim
+- ❌ "Tell me about inflation"
+- ✅ "Explain inflation as if I’m a high school student. Give a real-world example and 3 key effects it has on everyday life."
+
+## 2. 🎭 Set the Scene
+- Define roles: who *you* are and who *the model* should be.
+- ✅ "Act as a university professor giving a crash course on superconductors."
+- ✅ "I’m a beginner Python student. Explain in simple terms."
+
+## 3. 🧱 Control Output Format
+- ✅ "Use bullet points with bold keywords and one-liner explanations."
+- ✅ "Give a markdown table comparing X vs Y."
+
+## 4. 🪜 Break It Down
+- ❌ "Write a full research paper on LLMs."
+- ✅ "First give an outline. Then expand each point into ~150 words."
+
+## 5. 🔁 Refine Iteratively
+- Start simple:  
+  `"Explain quantum tunneling in simple terms."`  
+- Follow up:  
+  `"Nice—now add an analogy."`  
+  `"Now give me a 2-line summary."`
+
+## 6. 🎨 Embrace Weirdly Specific Prompts
+- ✅ “Explain this like I’m a cat trying to understand economic policies.”
+- ✅ “Summarize the Bhagavad Gita in a tweet thread format.”
+
+## 7. 📚 Use Few-Shot Prompting
+- Provide examples of desired output.
+- ✅ "Here’s a poem I like. Generate another in this style."
+
+## 8. 🙋‍♂️ Signal Uncertainty If Needed
+- ✅ "I'm not sure what I want yet, but I’m exploring AI use-cases in agriculture. Can you suggest a few?"
+
+## 9. 🧠 Use Conditional Instructions
+- ✅ "If the topic seems too advanced, simplify it with analogies."
+- ✅ "If any step needs prior knowledge, explain that first."
+
+## 10. 📓 Keep a Prompt Scratchpad
+- Log:
+  - Prompts that worked well
+  - What failed
+  - Templates for code, summaries, MCQs, explanations
+
+---
+
+### 💡 Summary Quote:
+> **“Be specific in goal, structured in request, flexible in tone, and iterative in thinking.”** """)
