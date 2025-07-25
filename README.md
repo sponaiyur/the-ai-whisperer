@@ -35,6 +35,7 @@ streamlit run app.py
 ---
 ## 🚀 Usage
 Once the app is running, enter your prompt in the input field. The app will evaluate it, suggest improvements, and respond to your query if the score is above 5. Use the Prompt History tab to view or download your previous prompts and scores. The third tab describes some Prompt Engineering best practices.
+
 Note: If you want the model to retain more than 5 prompts for iterations, please modify the `MAX_HISTORY_ITEMS` constant in `config.py`.
 
 ---
