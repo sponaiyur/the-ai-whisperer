@@ -6,6 +6,7 @@ This app was designed to teach everyone- not just AI engineers- the concept of p
 - 🔍 Prompt evaluation out of 10, with reasoning.
 - ✍️ Suggestions for better prompt structuring.
 - ✅ Executes and returns results if score > 5.
+- 💭 Retains memory of 5 recent prompts, to support iterative thinking.
 - ⏳ History tracking with scores.
 - 💾 Save to CSV and load across sessions.
 - 📐 Clean, responsive Streamlit UI.
@@ -34,6 +35,7 @@ streamlit run app.py
 ---
 ## 🚀 Usage
 Once the app is running, enter your prompt in the input field. The app will evaluate it, suggest improvements, and respond to your query if the score is above 5. Use the Prompt History tab to view or download your previous prompts and scores.
+Note: If you want the model to retain more than 5 prompts for iterations, please modify the `MAX_HISTORY_ITEMS` constant in `config.py`.
 
 ---
 ## Tech Stack

@@ -7,3 +7,11 @@ summarize machine learning,6.0
 Teach Javascript to someone who's proficient in backend and new to frontend.,7.0
 how are u doing,3.0
 teach me prompt engineering ,8.0
+What are some common pitfalls in my prompting? ,8.5
+"Hey! Let's discuss my progress. How can I avoid common pitfalls in my previous prompts? Specifically, which was the worst prompt i gave, as compared to the best?",8.0
+Do you remember what I just discussed?,4.0
+"Please re-state the last prompt I discussed with you, and evaluate it.",7.5
+"Consider, I have working knowledge of data analytics with Power BI. How would you guide me to use Tableau?",7.0
+Please give me a progress update on my prompting sessions with you.,8.2
+"Hey! I'm looking for some fonts to pair with Winky Rough. Can you give your results in a table, and rank the compatible heading-fonts from best to worst?",8.5
+"Okay! so i'm using the winky rough font as the body for a website. Now, could you re-generate that table, keeping this in mind?",8.8

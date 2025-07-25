@@ -1,111 +1,100 @@
-from dotenv import load_dotenv
 from groq import Groq
-import re
 import streamlit as st
-import csv
-import os
 import pandas as pd
+import config
+from utils import *
 
-HISTORY_CSV = "prompt_history.csv"
-FIELDNAMES = ["prompt", "score"]
-new_entry={
-    "prompt": "",
-    "score": 0
-}
+if not config.API_KEY:
+    st.warning("API key not defined! Please define your API key in your .env file and retry!")
 
-load_dotenv()  #load API key
-key= os.getenv('API_KEY')
-if not key:
-    st.warning("API Key not found. Please enter your API key in your .env file.")
+client= Groq(api_key=config.API_KEY)
+new_entry={"prompt":"","score":0}
 
-client= Groq(api_key=key)
-
-#run the prompt evaluation
 def run_prompt(prompt):
+    user_history=format_prompt_history(st.session_state.get("history")[-config.MAX_HISTORY_ITEMS:])     #considers 5 recent prompts
+    model_prompt= f"""You are a senior prompt engineer, 
+    and your task is to go through the prompt given by the user, and evaluate it out of 10.
+    Depending on their prompting history, give the user a score, and guide them accordingly.
+    Separate the output into two subheaders: 'Prompt evaluation', where you talk about the prompt itself and return a 
+    better prompt if necessary, and 'Answer Section', where you solve the user's query, provided the score is over 5.
+    Do not include any standalone * or - characters on a line by themselves. Only use bullet points with actual content.
+    
+    Given, user's prompting history:
+    {user_history}
+"""
+
     response = client.chat.completions.create(
-        model="llama3-70b-8192",
+        model=config.MODEL,
         messages=[
-            {"role": "system", "content": """You are a senior prompt engineer, 
-            and your task is to go through the prompt given by the user, and evaluate it out of 10.
-            Depending on their prompting history, give the user a score, and guide them accordingly.
-             Separate the output into two subheaders: 'Prompt evaluation', where you talk about the prompt itself and return a 
-             better prompt if necessary, and 'Answer Section', where you solve the user's query, provided the score is over 5.
-             Do not include any standalone * or - characters on a line by themselves. Only use bullet points with actual content."""},
+            {"role": "system", "content": model_prompt},
             {"role": "user", "content": prompt}
         ]
     )
     return response.choices[0].message.content.strip()
 
-#load previous data
-def load_history():
-    history = []
-    if os.path.exists(HISTORY_CSV):
-        with open(HISTORY_CSV, "r", newline='') as file:
-            reader = csv.DictReader(file)
-            for row in reader:
-                # Convert score from string to float
-                row["score"] = float(row["score"])
-                history.append(row)
-    return history
-
-# save the prompt data
-def save_history(history):
-    with open(HISTORY_CSV, "w", newline='') as file:
-        writer = csv.DictWriter(file, fieldnames=FIELDNAMES)
-        writer.writeheader()
-        for entry in history:
-            writer.writerow(entry)
-
-# Session state init
+#UI definition
 if "history" not in st.session_state:
-    st.session_state["history"] = load_history()
+    st.session_state["history"] = load_history(config.HISTORY_CSV)        #session state init
 
-#interface code
-st.title("🧠 The AI Whisperer: Your personal, AI based Prompt Critique!")
-st.subheader("Learn prompt engineering from a model that does both: Answers your query, and rates your prompt!")
+st.set_page_config(page_title="🪶 The AI Whisperer", layout="wide")
+
+#custom CSS
+st.markdown("""
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Winky+Rough:ital,wght@0,300..900;1,300..900&display=swap');
+        * {
+            box-sizing: border-box;
+            font-family: 'Winky Rough', cursive;
+        }
+        
+        /* the body has one font */
+        html, body, [class*="st-"] {
+            font-family: 'Winky Rough', cursive;
+        }
+        
+        /* and markdown headers have a different font */
+        div[data-testid="stMarkdown"] h1,
+        div[data-testid="stMarkdown"] h2,
+        div[data-testid="stMarkdown"] h3,
+        div[data-testid="stMarkdown"] h4,
+        div[data-testid="stMarkdown"] h5,
+        div[data-testid="stMarkdown"] h6 {
+            font-family: 'Montserrat Alternates', sans-serif !important;
+        }
+            
+    </style>
+""", unsafe_allow_html=True)
+
+st.markdown("# 🧠 The AI Whisperer: Your personal, AI based Prompt Critique!")
+st.markdown("## Learn prompt engineering from a model that does both: Answers your query, and rates your prompt!")
 
 tab1, tab2, tab3= st.tabs(["📜 Prompt Evaluation", "⏳ Prompt History","🪶 Golden Rules for better prompting"])
 with tab1:
-    st.subheader("📜 Prompt Evaluation")
-    prompt = st.text_input("Enter your prompt:")
-    if st.button("Evaluate Prompt"):
-        result=run_prompt(prompt)
-
-        match = re.search(
-                        r"(?:###|\*)\s*Prompt evaluation\s*(?:###|\*)?\s*(.*?)\s*(?:###|\*)\s*Answer Section\s*(?:###|\*)?\s*(.*)", 
-                        result, 
-                        re.DOTALL | re.IGNORECASE)
-        
-        
-        if match:
-            evaluation = match.group(1).strip()
-            answer = match.group(2).strip()
-
+    prompt=st.text_area("Enter your prompt",height=68)
+    if st.button("Evaluate Prompt",type="primary"):
+        response=run_prompt(prompt)
+        evaluation, answer, score = parse_ai_response(response)
+        if evaluation:
             with st.container():
-                st.markdown("### 📝 Prompt Evaluation")
-                evaluation_cleaned= re.sub(r'^\s*[\*\-]\s*$', '', evaluation, flags=re.MULTILINE)
-                st.markdown(evaluation_cleaned)
+                    st.markdown("### 📝 Prompt Evaluation")
+                    evaluation_cleaned= re.sub(r'^\s*[\*\-]\s*$', '', evaluation, flags=re.MULTILINE)
+                    formatted_evaluation=format_bulletins(evaluation_cleaned)
+                    st.markdown(formatted_evaluation, unsafe_allow_html=True)
 
+        if answer:
             with st.container():
                 st.markdown("### 📌 Answer Section")
                 answer_cleaned = re.sub(r'^\s*[\*\-]\s*$', '', answer, flags=re.MULTILINE)
-                st.markdown(answer_cleaned)
-        else:
-            # If parsing fails, just show full output
-            #st.warning("⚠️ Could not split output. Displaying full response:")
-            with st.container():
-                st.markdown("### Model Response")
-                st.markdown(result)
-
+                formatted_answer=format_bulletins(answer_cleaned)
+                st.markdown(formatted_answer, unsafe_allow_html=True)
         new_entry["prompt"] = prompt
-        new_entry["score"] = round(float(re.search(r"[-+]?\d*\.?\d+", result).group()),2)
+        new_entry["score"] = score
 
         # Save to session history
         st.session_state["history"].append(new_entry)
         st.success(f"Prompt evaluated! Score: {new_entry['score']}")
 
 with tab2:
-    st.subheader("⏳ Prompt History")
     if st.session_state["history"]:
         display_history = pd.DataFrame([
         {
@@ -117,13 +106,13 @@ with tab2:
         st.dataframe(display_history,use_container_width=True)
     else:
         st.write("No history available yet. Enter a prompt to start.")
-    
-    st.subheader("📂 Save Progress")
+
+    st.markdown("## 📂 Save Progress")
     if st.button("🔽 Save Progress to CSV"):
-        save_history(st.session_state["history"])
+        save_history(config.HISTORY_CSV, st.session_state["history"], config.FIELDNAMES)
         st.success("History saved to CSV!")
+
 with tab3:
-    st.subheader("🪶 Golden Rules for Better Prompting")
     st.markdown(""" 
 #### 1. 🎯 Be Purposeful — Don’t Just Ask, Aim
 - ❌ "Tell me about inflation"
