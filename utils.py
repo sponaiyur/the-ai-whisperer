@@ -93,7 +93,9 @@ def parse_ai_response(response) -> tuple:
     """
     score_match = re.search(r"[-+]?\d*\.?\d+", response)
     if score_match:
-        score = round(float(score_match.group()), 2) 
+        score = round(float(score_match.group()), 2)
+    else:
+        score=0.0
     match = re.search(
                     r"(?:###|\*)\s*Prompt evaluation\s*(?:###|\*)?\s*(.*?)\s*(?:###|\*)\s*Answer Section\s*(?:###|\*)?\s*(.*)", 
                     response, 
